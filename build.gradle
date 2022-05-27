@@ -1,0 +1,49 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'io.cucumber', name: 'cucumber-java', version: '7.3.1'
+    compileOnly group: 'io.cucumber', name: 'cucumber-jvm-deps', version: '1.0.6'
+    testImplementation group: 'io.cucumber', name: 'cucumber-junit', version: '7.3.1'
+    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+    // https://mvnrepository.com/artifact/io.rest-assured/rest-assured
+    testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '5.0.1'
+    // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.2.2'
+// https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jdk8
+    implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.13.2'
+
+}
+
+test {
+    useJUnitPlatform()
+}
+configurations {
+    cucumberRuntime {
+        extendsFrom testImplementation
+    }
+}
+task cucumber() {
+    dependsOn assemble, testClasses
+    doLast {
+        javaexec {
+            main = "io.cucumber.core.cli.Main"
+            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+            args = ['--plugin', 'pretty',
+                    '--plugin','html:target/cucumber-report.html',
+                    '--glue', 'stepDefinitions',
+                    'src/test/resources',
+            ]
+        }
+    }
+}
+
+
